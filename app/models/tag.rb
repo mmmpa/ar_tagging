@@ -10,7 +10,7 @@ class Tag < ActiveRecord::Base
 
   scope :used, -> {
     joins { taggings.outer }
-      .select { count(taggings.id).as(count) }
+      .select { ['tags.*', count(taggings.id).as(count)] }
       .group { id }
   }
 

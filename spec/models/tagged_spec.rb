@@ -91,16 +91,24 @@ RSpec.describe Tagged, type: :model do
     end
 
     describe 'Count Tag used' do
+      context 'has all attributes' do
+        it do
+          Tag.used.as_json.each do |hash|
+            hash.values.each do |v|
+              expect(v).not_to be_nil
+            end
+          end
+        end
+      end
+
       context 'with no filter' do
         it do
-          p Tag.used.to_sql
           expect(Tag.used.map(&:count)).to eq([4, 3, 2, 2, 0])
         end
       end
 
       context 'with tag' do
         it do
-          p Tag.on(@tag1.id).used.to_sql
           expect(Tag.on(@tag1.id).used.map(&:count)).to eq([4, 2, 2, 2])
         end
 

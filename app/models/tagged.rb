@@ -9,7 +9,7 @@ class Tagged < ActiveRecord::Base
     joins { taggings }
       .where { taggings.tag_id.in(tag_ids) }
       .group { id }
-      .having { count(id).eq tag_ids.size }
+      .having { count(id).eq(tag_ids.size) }
   }
 
   scope :all_on, ->(*tag_ids) {
