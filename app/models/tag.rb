@@ -8,25 +8,27 @@ class Tag < ActiveRecord::Base
   validates :name,
             presence: true
 
-  scope :counted, -> {
+  scope :used, -> {
     joins { taggings.outer }
-      .select('tags.*, COUNT(taggings.id) AS count')
+      .select { count(taggings.id).as(count) }
       .group { id }
   }
 
   scope :on, ->(*tag_ids) {
     joins { taggings.outer }
-      .where { taggings.tagged_id.in(Tagged.on(*tag_ids).select { id }) }
+      .where { taggings.tagged_id.in(Tagged.on(tag_ids).select { id }) }
   }
 
-  def self.zero_counted
-    stored_count = Tagging.counted
-    find_each.map { |r| r.zero_count = stored_count[r.id].to_i; r }
-  end
+  class << self
+    def zero_used
+      stored_count = Tagging.counted
+      find_each.map { |r| r.zero_count = stored_count[r.id].to_i; r }
+    end
 
-  def self.zero_counted_with(*tag_ids)
-    sub_query = Tagged.on(*tag_ids).select(:id)
-    stored_count = Tagging.on_tagged(sub_query).counted
-    find_each.map { |r| r.zero_count = stored_count[r.id].to_i; r }
+    def zero_used_with(*tag_ids)
+      sub_query = Tagged.on(*tag_ids).select(:id)
+      stored_count = Tagging.on_tagged(sub_query).counted
+      find_each.map { |r| r.zero_count = stored_count[r.id].to_i; r }
+    end
   end
 end

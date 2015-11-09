@@ -8,13 +8,13 @@ RSpec.describe Tagged, type: :model do
 
   describe 'Speed' do
     before :all do
-      num = 10000
+      num = 100
 
       tagged = (1..num).to_a.map do
         create(:tagged, :valid)
       end
 
-      tag =  (1..num).to_a.map do
+      tag = (1..num).to_a.map do
         create(:tag, :valid)
       end
 
@@ -37,19 +37,17 @@ RSpec.describe Tagged, type: :model do
     end
 
     it do
-      ActiveRecord::Base.connection.query_cache.clear
       result = Benchmark.realtime do
-        p Tag.zero_counted.sample.id
-        p Tag.zero_counted_with(*@tags).sample.try(:id)
+        Tag.zero_used.sample.id
+        Tag.zero_used_with(*@tags).sample.try(:id)
       end
       p "処理 #{result}s"
     end
 
     it do
-      ActiveRecord::Base.connection.query_cache.clear
       result = Benchmark.realtime do
-        p Tag.counted.take.id
-        p Tag.on(*@tags).counted.take.try(:id)
+        Tag.used.take.id
+        Tag.on(*@tags).used.take.try(:id)
       end
       p "処理 #{result}s"
     end
@@ -92,61 +90,71 @@ RSpec.describe Tagged, type: :model do
       Tagging.delete_all
     end
 
-    describe 'Count Tag' do
+    describe 'Count Tag used' do
       context 'with no filter' do
         it do
-          expect(Tag.counted.map(&:count)).to eq([4, 3, 2, 2, 0])
+          p Tag.used.to_sql
+          expect(Tag.used.map(&:count)).to eq([4, 3, 2, 2, 0])
         end
       end
 
       context 'with tag' do
         it do
-          expect(Tag.on(@tag1.id).counted.map(&:count)).to eq([4, 2, 2, 2])
+          p Tag.on(@tag1.id).used.to_sql
+          expect(Tag.on(@tag1.id).used.map(&:count)).to eq([4, 2, 2, 2])
         end
 
         it do
-          expect(Tag.on(@tag2.id).counted.map(&:count)).to eq([2, 3, 1, 1])
+          expect(Tag.on(@tag2.id).used.map(&:count)).to eq([2, 3, 1, 1])
         end
 
         it do
-          expect(Tag.on(@tag3.id).counted.map(&:count)).to eq([2, 1, 2, 2])
+          expect(Tag.on(@tag3.id).used.map(&:count)).to eq([2, 1, 2, 2])
         end
 
         it do
-          expect(Tag.on(@tag4.id).counted.map(&:count)).to eq([2, 1, 2, 2])
+          expect(Tag.on(@tag4.id).used.map(&:count)).to eq([2, 1, 2, 2])
         end
 
         it do
-          expect(Tag.on(@tag5.id).counted.map(&:count)).to eq([])
+          expect(Tag.on(@tag5.id).used.map(&:count)).to eq([])
         end
       end
     end
 
-    describe 'Count Tag with Zero' do
+    describe 'Count Tag used with Zero' do
       context 'with tag' do
         it do
-          expect(Tag.zero_counted_with(@tag1.id).map(&:zero_count)).to eq([4, 2, 2, 2, 0])
+          expect(Tag.zero_used_with(@tag1.id).map(&:zero_count)).to eq([4, 2, 2, 2, 0])
         end
 
         it do
-          expect(Tag.zero_counted_with(@tag2.id).map(&:zero_count)).to eq([2, 3, 1, 1, 0])
+          expect(Tag.zero_used_with(@tag2.id).map(&:zero_count)).to eq([2, 3, 1, 1, 0])
         end
 
         it do
-          expect(Tag.zero_counted_with(@tag3.id).map(&:zero_count)).to eq([2, 1, 2, 2, 0])
+          expect(Tag.zero_used_with(@tag3.id).map(&:zero_count)).to eq([2, 1, 2, 2, 0])
         end
 
         it do
-          expect(Tag.zero_counted_with(@tag4.id).map(&:zero_count)).to eq([2, 1, 2, 2, 0])
+          expect(Tag.zero_used_with(@tag4.id).map(&:zero_count)).to eq([2, 1, 2, 2, 0])
         end
 
         it do
-          expect(Tag.zero_counted_with(@tag5.id).map(&:zero_count)).to eq([0, 0, 0, 0, 0])
+          expect(Tag.zero_used_with(@tag5.id).map(&:zero_count)).to eq([0, 0, 0, 0, 0])
         end
       end
     end
 
-    describe 'Pick Tagged by Tag' do
+    describe 'Pick Tagged by Tag (or)' do
+      context 'with tag1' do
+        it 'get ed1, ed3, ed4, ed5' do
+          expect(Tagged.all_on(@tag1.id, @tag2.id)).to match_array([@ed1, @ed2, @ed3, @ed4, @ed5])
+        end
+      end
+    end
+
+    describe 'Pick Tagged by Tag (and)' do
       context 'with tag1' do
         it 'get ed1, ed3, ed4, ed5' do
           expect(Tagged.on(@tag1.id)).to match_array([@ed1, @ed3, @ed4, @ed5])
