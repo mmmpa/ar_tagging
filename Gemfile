@@ -22,6 +22,7 @@ gem 'factory_girl'
 gem 'factory_girl_rails'
 gem 'simplecov'
 gem 'simplecov-rcov'
+gem 'coveralls'
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
