@@ -38,19 +38,28 @@ RSpec.describe Tagged, type: :model do
 
     it do
       result = Benchmark.realtime do
-        Tag.zero_used.sample.id
-        Tag.zero_used_with(*@tags).sample.try(:id)
+        Tag.zero_used.map(&:to_s)
+        Tag.zero_used_with(*@tags).map(&:to_s)
       end
       p "処理 #{result}s"
     end
 
     it do
       result = Benchmark.realtime do
-        Tag.used.take.id
-        Tag.on(*@tags).used.take.try(:id)
+        Tag.used.map(&:to_s)
+        Tag.on(*@tags).used.map(&:to_s)
       end
       p "処理 #{result}s"
     end
+
+    it do
+      result = Benchmark.realtime do
+        Tag.used.map(&:to_s)
+        Tag.used_on_with_zero(@tags).map(&:to_s)
+      end
+      p "処理 #{result}s"
+    end
+
   end
 
   describe 'Scope' do
@@ -126,6 +135,30 @@ RSpec.describe Tagged, type: :model do
 
         it do
           expect(Tag.on(@tag5.id).used.map(&:count)).to eq([])
+        end
+      end
+    end
+
+    describe 'Count zero' do
+      context 'with no filter' do
+        it do
+          expect(Tag.used_on_with_zero(@tag1.id).map(&:count)).to eq([4, 2, 2, 2, 0])
+        end
+
+        it do
+          expect(Tag.used_on_with_zero(@tag2.id).map(&:count)).to eq([2, 3, 1, 1, 0])
+        end
+
+        it do
+          expect(Tag.used_on_with_zero(@tag3.id).map(&:count)).to eq([2, 1, 2, 2, 0])
+        end
+
+        it do
+          expect(Tag.used_on_with_zero(@tag4.id).map(&:count)).to eq([2, 1, 2, 2, 0])
+        end
+
+        it do
+          expect(Tag.used_on_with_zero(@tag5.id).map(&:count)).to eq([0, 0, 0, 0, 0])
         end
       end
     end

@@ -8,6 +8,16 @@ class Tag < ActiveRecord::Base
   validates :name,
             presence: true
 
+  scope :used_on_with_zero, ->(*tag_ids) {
+    from { "#{
+    Tag.joins { taggings.outer }
+      .select { ['tags.*', '0 as count'] }
+      .uniq
+      .where { id.not_in(Tag.on(tag_ids)) }
+      .union(Tag.on(tag_ids).used).to_sql
+    } tags" }
+  }
+
   scope :used, -> {
     joins { taggings.outer }
       .select { ['tags.*', count(taggings.id).as(count)] }
