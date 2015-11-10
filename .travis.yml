@@ -1,0 +1,15 @@
+language: ruby
+rvm:
+  - 2.1.5
+  - 2.2.2
+env:
+  - DB=sqlite
+before_install:
+  - gem install bundler -v 1.10.3
+install:
+  - bundle install
+cache:
+  directories:
+    - vendor/bundle
+script:
+  - bundle exec rake
