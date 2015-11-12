@@ -9,13 +9,12 @@ class Tag < ActiveRecord::Base
             presence: true
 
   scope :used_on_with_zero, ->(*tag_ids) {
-    from { "#{
-    Tag.joins { taggings.outer }
-      .select { ['tags.*', '0 as count'] }
-      .uniq
-      .where { id.not_in(Tag.on(tag_ids)) }
-      .union(Tag.on(tag_ids).used).to_sql
-    } tags" }
+    raw = Tag.joins { taggings.outer }
+            .select { ['tags.*', '0 as count'] }
+            .uniq
+            .where { id.not_in(Tag.on(tag_ids)) }
+            .union(Tag.on(tag_ids).used).to_sql
+    from { "#{raw} tags" }
   }
 
   scope :used, -> {
