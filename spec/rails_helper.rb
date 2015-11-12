@@ -15,7 +15,7 @@ require 'rspec/rails'
 require 'simplecov'
 require 'simplecov-rcov'
 
-SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[Coveralls::SimpleCov::Formatter]
 SimpleCov.start 'rails' do
   add_filter '/lib/'
   add_filter '/spec/'
