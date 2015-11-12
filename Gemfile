@@ -22,7 +22,8 @@ gem 'factory_girl'
 gem 'factory_girl_rails'
 gem 'simplecov'
 gem 'simplecov-rcov'
-gem 'coveralls'
+gem 'coveralls', group: :test, require: nil
+gem "codeclimate-test-reporter", group: :test, require: nil
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
